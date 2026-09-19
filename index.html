@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Movie Site</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🎬 My Movie Site</h1>
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search for a movie...">
+            <button id="search-button">Search</button>
+        </div>
+    </header>
+
+    <main>
+        <div id="movie-grid" class="movie-grid"></div>
+    </main>
+
+    <script>
+        const API_KEY = 'YOUR_TMDB_API_KEY'; // Replace with your key
+        const BASE_URL = 'https://api.themoviedb.org/3';
+        const IMG_BASE = 'https://image.tmdb.org/t/p/w500';
+
+        const movieGrid = document.getElementById('movie-grid');
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.getElementById('search-button');
+
+        // Fetch popular movies on load
+        async function loadPopularMovies() {
+            const res = await fetch(`${BASE_URL}/movie/popular?api_key=${API_KEY}&language=en-US&page=1`);
+            const data = await res.json();
+            displayMovies(data.results);
+        }
+
+        // Search for movies
+        async function searchMovies(query) {
+            if (!query) return loadPopularMovies();
+            const res = await fetch(`${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`);
+            const data = await res.json();
+            displayMovies(data.results);
+        }
+
+        // Render movie cards
+        function displayMovies(movies) {
+            movieGrid.innerHTML = '';
+            if (!movies || movies.length === 0) {
+                movieGrid.innerHTML = '<p>No results found.</p>';
+                return;
+            }
+            movies.forEach(movie => {
+                const card = document.createElement('div');
+                card.className = 'movie-card';
+                card.innerHTML = `
+                    <img src="${movie.poster_path ? IMG_BASE + movie.poster_path : 'https://via.placeholder.com/500x750?text=No+Poster'}" alt="${movie.title}">
+                    <h3>${movie.title}</h3>
+                    <p>${movie.release_date ? movie.release_date.split('-')[0] : 'N/A'}</p>
+                    <a href="watch.html?id=${movie.id}" class="watch-btn">Watch Now</a>
+                `;
+                movieGrid.appendChild(card);
+            });
+        }
+
+        // Event listeners
+        searchButton.addEventListener('click', () => searchMovies(searchInput.value.trim()));
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchMovies(searchInput.value.trim());
+        });
+
+        // Initial load
+        loadPopularMovies();
+    </script>
+</body>
+</html>
