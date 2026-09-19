@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch Movie</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">🎬 My Movie Site</a></h1>
+    </header>
+
+    <main class="watch-container">
+        <div id="player-wrapper">
+            <!-- The iframe will be inserted here by JavaScript -->
+        </div>
+        <div id="movie-info">
+            <h2 id="movie-title">Loading...</h2>
+            <p id="movie-overview"></p>
+        </div>
+    </main>
+
+    <script>
+        const API_KEY = 'YOUR_TMDB_API_KEY'; // Replace with your key
+        const BASE_URL = 'https://api.themoviedb.org/3';
+        const IMG_BASE = 'https://image.tmdb.org/t/p/w500';
+
+        // Get the movie ID from the URL (e.g., watch.html?id=123)
+        const urlParams = new URLSearchParams(window.location.search);
+        const movieId = urlParams.get('id');
+
+        if (!movieId) {
+            document.getElementById('player-wrapper').innerHTML = '<p>No movie ID provided.</p>';
+        } else {
+            // 1. Fetch movie details from TMDB
+            fetch(`${BASE_URL}/movie/${movieId}?api_key=${API_KEY}&language=en-US`)
+                .then(res => res.json())
+                .then(movie => {
+                    document.getElementById('movie-title').textContent = movie.title;
+                    document.getElementById('movie-overview').textContent = movie.overview;
+
+                    // 2. Embed the player (using VidSrc as the provider)
+                    const playerWrapper = document.getElementById('player-wrapper');
+                    const iframe = document.createElement('iframe');
+                    iframe.src = `https://vidsrc.xyz/embed/movie/${movieId}`; // VidSrc embed URL
+                    iframe.setAttribute('allowfullscreen', 'true');
+                    iframe.setAttribute('frameborder', '0');
+                    iframe.style.width = '100%';
+                    iframe.style.height = '100%';
+                    playerWrapper.appendChild(iframe);
+                })
+                .catch(err => {
+                    console.error(err);
+                    document.getElementById('movie-title').textContent = 'Error loading movie.';
+                });
+        }
+    </script>
+</body>
+</html>
